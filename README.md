@@ -1,119 +1,126 @@
-# 📘 README: Custom RAG Engine – Capstone (AI Singapore AIAP Batch 17)
+# 🧠 Custom RAG Engine – Capstone (AI Singapore AIAP B17)
 
-> Lightweight, modular Retrieval-Augmented Generation (RAG) system for internal document QA, enhanced with self-hosted LLMs, LangChain routing, and Kubernetes-ready deployment.
+> A secure, containerized Retrieval-Augmented Generation (RAG) system for querying enterprise documents (code, markdown, and structured data), powered by open-source LLMs and hybrid embeddings.
 
 ---
 
 ## 🎯 Objective
 
-Develop a production-grade RAG system that can:
-- Parse and semantically index markdowns, PDFs, and tabular files
-- Handle complex internal queries via LangChain chains and agents
-- Retrieve precise, structured answers with metadata and self-reflection
-- Deploy securely on Kubernetes with modular microservice architecture
+Build a local, production-grade RAG system that:
+- Parses internal documentation (markdown, CSV, PDFs, code)
+- Retrieves semantically relevant chunks using hybrid embeddings
+- Answers queries via local LLMs with table reasoning and fallback agents
+- Deploys on Kubernetes using containerized backend/frontend services
 
 ---
 
 ## 📂 Project Structure
 
-| Component                          | Description                                                       |
-|-----------------------------------|-------------------------------------------------------------------|
-| `src/`                             | All backend logic: embedding, RAG chain, model loading, agents    |
-| `streamlit_ui.py`                 | Main UI app entrypoint for document upload + query interaction   |
-| `start.sh`                        | Shell script for local development and streamlit run             |
-| `mini-project.yml`                | Environment and evaluation routing spec (LangChain-based)        |
-| `deployment.yaml` & `service.yaml`| Kubernetes manifests for deploying the app and exposing services |
-| `dockerfiles/Dockerfile`         | Dockerfile for containerizing the RAG system                     |
-| `scrape_gitlab_files.ipynb`       | Utility script for parsing GitLab files (markdown/code)          |
-| `requirements.txt`                | Dependency list for pip install                                   |
+| File/Dir                         | Description                                                                |
+|----------------------------------|----------------------------------------------------------------------------|
+| `src/`                           | Main source code for RAG engine                                            |
+| ├─ `streamlit_ui.py`            | Frontend: file uploader + chat interface                                  |
+| ├─ `main.py`                    | Backend controller for loading models and chains                          |
+| ├─ `rag_chain.py`               | LangChain pipeline orchestration (retrieval, routing, evaluation)         |
+| ├─ `model_loader.py`            | Loads MiniLM + GraphCodeBERT for hybrid embedding                         |
+| ├─ `embedding_generation.py`    | Generates embeddings using HuggingFace models                             |
+| ├─ `data_ingestion.py`          | Handles document chunking + metadata tagging                              |
+| ├─ `faiss_index.py`             | FAISS vector store setup + retrieval                                      |
+| ├─ `evaluation_agent.py`        | LangChain-based self-reflective fallback agent                            |
+| ├─ `question_handler.py`        | Pandas agent + YAML output formatting                                     |
+| ├─ `document_store.py`          | Internal store for parsed document metadata                               |
+| `requirements.txt`              | Project dependencies                                                      |
+| `deployment.yaml`, `service.yaml`| Kubernetes manifests for deploying backend + Streamlit app                |
+| `dockerfiles/Dockerfile`        | Docker container for RAG engine                                           |
+| `mini-project.yml`              | Agent orchestration config                                                |
+| `start.sh`                      | Convenience script to launch the app locally                              |
 
 ---
 
 ## 🧱 System Architecture
 
-- **Frontend:** Streamlit interface with drag-and-drop file upload and chat-style interaction
-- **LLM Backend:** Local Ollama instance running `llama3:instruct`
-- **Vector Store:** FAISS with HuggingFace `instructor-large` embeddings
-- **RAG Chain:** LangChain-based orchestration with:
+- **Frontend:** Streamlit UI for uploading files and submitting queries
+- **Backend:** Ollama-hosted LLaMA 3.1 Instruct model
+- **Embedding Strategy:** Hybrid embeddings using:
+  - `all-MiniLM-L6-v2` for text/markdown
+  - `microsoft/graphcodebert-base` for code files
+- **Retriever:** FAISS vector store with LangChain retriever
+- **Routing:** LangChain chains with:
   - Metadata filtering
-  - Pandas agent for tabular queries
-  - Self-evaluation agent for fallback routing
+  - Conversational memory
+  - Pandas agent for structured table reasoning
+  - Self-reflective evaluator fallback agent
 
 ---
 
 ## 🔍 Key Features
 
-| Feature                    | Description                                                                 |
-|---------------------------|-----------------------------------------------------------------------------|
-| 📎 Upload & Ingest        | Ingests markdown, code, CSV, PDF documents                                  |
-| 🧠 Smart QA Pipeline       | Automatically routes queries to retriever or tabular agent                  |
-| 🧩 Chunking + Metadata     | Recursive chunking with custom tags (`repo`, `path`, `type`)                |
-| 🔁 Feedback Agent          | Evaluates response quality and triggers fallback if needed                  |
-| 🐳 Dockerized              | Dockerfile included for local builds and testing                            |
-| ☁ Kubernetes Ready         | Manifests provided to run the full app and Ollama on K8s                    |
+| Feature                      | Description                                                                 |
+|-----------------------------|-----------------------------------------------------------------------------|
+| 🗂️ Hybrid Embedding Loader  | Loads separate models for text and code (MiniLM + GraphCodeBERT)            |
+| 🧩 Recursive Chunking        | Intelligent chunk splitting with file-level metadata                        |
+| 🧠 Self-Evaluation Agent     | Re-evaluates weak answers and auto-routes to fallback chain                 |
+| 📊 Tabular Reasoning Agent   | Uses pandas to answer table-style queries                                  |
+| 🔒 Secure Deployment         | Local LLM inference via Ollama + containerized with Kubernetes manifests    |
+| 🎛️ Multi-format Support     | Handles markdowns, CSVs, PDFs (via text extraction), and source code        |
 
 ---
 
-## ⚙️ Local Setup
+## ⚙️ Deployment
+
+### 🚀 Local Setup
 
 ```bash
-# Install environment
+# Install Ollama, FAISS, and Python 3.11+
+ollama run llama3:instruct
+
 conda create -n rag-bot python=3.11
 pip install -r requirements.txt
 
-# Start Ollama
-ollama run llama3:instruct
-
-# Launch app
-bash start.sh
+# Run Streamlit app
+streamlit run src/streamlit_ui.py
 ```
 
----
-
-## ☁ Kubernetes Deployment
+### ☁ Kubernetes Setup
 
 ```bash
+# Apply manifests (Streamlit + Ollama)
 kubectl apply -f deployment.yaml
 kubectl apply -f service.yaml
 ```
 
-> Ollama deployment assumes separate node/container — recommended for GPU-backed environments.
-
 ---
 
-## ✅ Evaluation Highlights
+## ✅ Evaluation
 
-- Supports structured outputs via YAML parsing
-- Evaluated on internal HR-style analytical queries
-- Modular logic enables agent chaining and contextual reranking
-- Suitable for offline deployment, enterprise firewalls, or secure air-gapped usage
+- Query types supported: breakdown, trend, list, correlation, and detail
+- Auto-routes to tabular agent or fallback evaluator when applicable
+- Produces YAML outputs for downstream integration
+- Built for air-gapped or secure enterprise environments
 
 ---
 
 ## 📌 Conclusion
 
-This capstone delivers a reusable, containerized Retrieval-Augmented Generation (RAG) system designed for internal enterprise knowledge retrieval. Emphasis is placed on:
-- Retrieval precision via embeddings + metadata
-- Reasoning across structured data (e.g. CSVs) with pandas agents
-- UX and modular logic routing
-- Scalable deployment with Kubernetes support
+This capstone demonstrates a secure, extensible RAG system that can reason over diverse enterprise documentation (markdowns, tables, code) using hybrid embeddings and open-source LLMs. Modular LangChain routing and a polished Streamlit UI make it a powerful internal knowledge retrieval tool.
 
 ---
 
-## 🛠 Tools & Skills
+## 🛠 Skills & Tools Used
 
-- Python · LangChain · FAISS · Ollama · Streamlit · Kubernetes · Docker  
-- HuggingFace Embeddings · Self-Reflective Agents · YAML Routing
+- Python · LangChain · Streamlit · FAISS · Ollama
+- MiniLM + GraphCodeBERT (HuggingFace)
+- Pydantic · YAML · Pandas Agents
+- Kubernetes · Docker · Markdown & Code Indexing
 
 ---
 
 ## 📚 References
 
-1. https://github.com/langchain-ai/langchain  
-2. https://ollama.com  
-3. https://streamlit.io  
-4. https://github.com/hkunlp/instructor-embedding  
-5. https://python.langchain.com/docs/use_cases/question_answering/
+1. https://github.com/langchain-ai/langchain
+2. https://ollama.com
+3. https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+4. https://huggingface.co/microsoft/graphcodebert-base
+5. https://streamlit.io
 
 ---
-
