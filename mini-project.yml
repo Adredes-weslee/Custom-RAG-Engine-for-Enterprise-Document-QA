@@ -1,0 +1,25 @@
+name: mini-project
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9.11
+  - pandas
+  - requests
+  - faiss-cpu
+  - sentence-transformers
+  - glob2
+  - streamlit
+  - python-dotenv
+  - pip
+  - pip:
+    - langchain
+    - langchain-google-genai
+    - langchain_openai
+    - langchain_community
+    - langchain_experimental
+    - tabulate
+    - transformers
+    - sentencepiece
+    - "huggingface_hub[cli]"
+    - langchain-ollama

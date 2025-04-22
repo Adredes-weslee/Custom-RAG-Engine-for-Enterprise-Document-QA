@@ -1,0 +1,20 @@
+# Conda dependencies
+pandas==2.2.2
+requests==2.32.3
+faiss-cpu==1.8.0  # Assuming faiss-cpu version matches faiss
+sentence-transformers==3.2.1
+glob2==0.7
+streamlit==1.38.0
+python-dotenv==0.21.0
+
+# Pip dependencies
+langchain==0.3.4
+langchain-google-genai==2.0.1
+langchain_openai==0.2.3
+langchain_community==0.3.3
+langchain_experimental==0.3.2
+tabulate==0.9.0
+transformers==4.44.1
+sentencepiece==0.2.0
+huggingface_hub[cli]==0.24.6
+langchain-ollama==0.2.0

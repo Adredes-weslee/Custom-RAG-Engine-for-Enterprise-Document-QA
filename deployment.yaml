@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streamlit-ollama-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: streamlit-ollama-app
+  template:
+    metadata:
+      labels:
+        app: streamlit-ollama-app
+    spec:
+      containers:
+      - name: streamlit-ollama
+        image: asia-southeast1-docker.pkg.dev/aiap-17-ds/aiap-17-ds/wes_lee/mini_project:1.0.0 # Replace with your image tag
+        ports:
+          - containerPort: 8501 # Streamlit's default port
+          - containerPort: 11434 # Ollama's default port
+        resources:
+          requests:
+            cpu: "8"         # Request 8 CPU cores
+            memory: "16Gi"   # Request 16GB of memory
+          limits:
+            cpu: "8"         # Limit container to 8 CPU cores
+            memory: "16Gi"   # Limit container to 16GB of memory
+        env:
+          - name: OLLAMA_MODELS
+            value: "/home/aisg/visiera/.ollama/models" # Environment variable for model path
