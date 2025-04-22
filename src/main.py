@@ -1,7 +1,7 @@
 import streamlit as st
 from config import *
 from logging_setup import logger
-from faiss_utils import load_faiss_index
+from faiss_index import load_faiss_index
 from document_store import load_documents, create_docstore
 from rag_chain import setup_rag_chain
 from question_handler import handle_question
