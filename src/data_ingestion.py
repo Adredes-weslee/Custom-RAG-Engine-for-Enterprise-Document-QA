@@ -7,7 +7,7 @@ from model_loader import load_models
 from text_extraction import extract_text_from_files, initialize_semantic_chunkers
 from file_retrieval import get_code_files
 from embedding_generation import generate_code_embeddings, generate_sentence_embeddings, project_embeddings
-# from data_enhancement import enhance_data_with_llm
+from data_enhancement import enhance_data_with_llm
 from faiss_index import create_faiss_index, save_faiss_index, load_faiss_index
 from langchain_ollama.llms import OllamaLLM
 from typing import List, Tuple
@@ -51,9 +51,9 @@ def main(root_directory: str) -> None:
         ipynb_texts = [text for text, name in zip(texts, doc_names) if name.endswith('.ipynb')]
 
         # Enhance data before generating embeddings
-        # llm = OllamaLLM(model="llama3.2")
-        # py_texts = [enhance_data_with_llm(text, llm) for text in tqdm(py_texts, desc="Enhancing Python files")]
-        # ipynb_texts = [enhance_data_with_llm(text, llm) for text in tqdm(ipynb_texts, desc="Enhancing Jupyter notebooks")]
+        llm = OllamaLLM(model="llama3.2")
+        py_texts = [enhance_data_with_llm(text, llm) for text in tqdm(py_texts, desc="Enhancing Python files")]
+        ipynb_texts = [enhance_data_with_llm(text, llm) for text in tqdm(ipynb_texts, desc="Enhancing Jupyter notebooks")]
 
         # Generate embeddings
         py_embeddings = generate_code_embeddings(py_texts, code_tokenizer, code_model)
