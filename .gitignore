@@ -1,4 +1,10 @@
 # Ignore all files in the data directory
 data/*
 models/*
+
+# Environment files (but keep the template)
 .env
+.env.local
+.env.*.local
+*.env
+!.env.example
