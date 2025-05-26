@@ -1,6 +1,6 @@
 import streamlit as st
-from config import *
-from logging_setup import logger
+from config.config import *
+from utils.logging_setup import logger
 from faiss_index import load_faiss_index
 from document_store import load_documents, create_docstore
 from rag_chain import setup_rag_chain
