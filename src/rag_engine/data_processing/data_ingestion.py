@@ -2,13 +2,20 @@ import os
 import json
 import numpy as np
 from tqdm import tqdm
+import sys
+from pathlib import Path
+
+# Add project root to path for imports
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+sys.path.append(str(PROJECT_ROOT))
+
 from utils.logging_setup import setup_logging
-from model_loader import load_models
-from text_extraction import extract_text_from_files, initialize_semantic_chunkers
-from file_retrieval import get_code_files
-from embedding_generation import generate_code_embeddings, generate_sentence_embeddings, project_embeddings
-from data_enhancement import enhance_data_with_llm
-from faiss_index import create_faiss_index, save_faiss_index, load_faiss_index
+from rag_engine.embeddings.model_loader import load_models
+from rag_engine.data_processing.text_extraction import extract_text_from_files, initialize_semantic_chunkers
+from rag_engine.data_processing.file_retrieval import get_code_files
+from rag_engine.embeddings.embedding_generation import generate_code_embeddings, generate_sentence_embeddings, project_embeddings
+from rag_engine.data_processing.data_enhancement import enhance_data_with_llm
+from rag_engine.embeddings.faiss_index import create_faiss_index, save_faiss_index, load_faiss_index
 from langchain_ollama.llms import OllamaLLM
 from typing import List, Tuple
 
