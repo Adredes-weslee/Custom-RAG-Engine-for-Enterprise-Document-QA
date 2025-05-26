@@ -1,7 +1,10 @@
 from transformers import AutoTokenizer, AutoModel
 from sentence_transformers import SentenceTransformer
 from typing import Tuple, Optional
-import logging
+from utils.logging_setup import setup_logging
+
+# Set up logging
+logger = setup_logging()
 
 def load_models(use_safetensors: bool = True) -> Tuple[SentenceTransformer, AutoTokenizer, AutoModel]:
     """
@@ -26,12 +29,12 @@ def load_models(use_safetensors: bool = True) -> Tuple[SentenceTransformer, Auto
             code_tokenizer = AutoTokenizer.from_pretrained("microsoft/graphcodebert-base")
             code_model = AutoModel.from_pretrained("microsoft/graphcodebert-base")
             
-        logging.info(f"Successfully loaded models (safetensors mode: {use_safetensors})")
+        logger.info(f"Successfully loaded models (safetensors mode: {use_safetensors})")
         return sentence_model, code_tokenizer, code_model
         
     except Exception as e:
-        logging.error(f"Error loading models: {e}")
+        logger.error(f"Error loading models: {e}")
         if use_safetensors:
-            logging.info("Falling back to original models...")
+            logger.info("Falling back to original models...")
             return load_models(use_safetensors=False)
         raise

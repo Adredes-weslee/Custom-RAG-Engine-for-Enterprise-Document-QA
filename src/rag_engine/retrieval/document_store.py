@@ -1,9 +1,14 @@
 import os
 import json
+import sys
+from pathlib import Path
+from utils.logging_setup import setup_logging
 from typing import List, Dict
 from langchain.docstore import InMemoryDocstore
 from langchain.docstore.document import Document
-from utils.logging_setup import logger
+
+# Set up logging
+logger = setup_logging()
 
 def load_documents(docstore_path: str) -> List[Dict]:
     """

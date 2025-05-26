@@ -1,7 +1,10 @@
 import os
 import glob
-import logging
+from utils.logging_setup import setup_logging
 from typing import List
+
+# Set up logging
+logger = setup_logging()
 
 def get_code_files(directory: str) -> List[str]:
     """
@@ -15,5 +18,5 @@ def get_code_files(directory: str) -> List[str]:
     """
     py_files = glob.glob(os.path.join(directory, '**/*.py'), recursive=True)
     ipynb_files = glob.glob(os.path.join(directory, '**/*.ipynb'), recursive=True)
-    logging.info(f"Found {len(py_files)} .py files and {len(ipynb_files)} .ipynb files.")
+    logger.info(f"Found {len(py_files)} .py files and {len(ipynb_files)} .ipynb files.")
     return py_files + ipynb_files

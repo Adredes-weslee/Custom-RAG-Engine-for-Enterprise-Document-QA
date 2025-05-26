@@ -1,10 +1,12 @@
 import os
 import json
-import logging
+from utils.logging_setup import setup_logging
 from typing import List, Tuple
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 
+# Set up logging
+logger = setup_logging()
 
 def initialize_semantic_chunkers() -> Tuple[CharacterTextSplitter, CharacterTextSplitter]:
     """
@@ -75,7 +77,7 @@ def extract_text_from_files(file_paths: List[str], markdown_splitter: CharacterT
                             chunks = code_splitter.split_text(cell_text)
                             texts.extend(chunks)
                             doc_names.extend([os.path.basename(file_path)] * len(chunks))
-                logging.info(f"Extracted text from notebook: {file_path}")
+                logger.info(f"Extracted text from notebook: {file_path}")
             elif file_path.endswith('.py'):
                 # Extract text from Python scripts
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -83,7 +85,7 @@ def extract_text_from_files(file_paths: List[str], markdown_splitter: CharacterT
                     chunks = code_splitter.split_text(file_text)
                     texts.extend(chunks)
                     doc_names.extend([os.path.basename(file_path)] * len(chunks))
-                logging.info(f"Extracted text from script: {file_path}")
+                logger.info(f"Extracted text from script: {file_path}")
         except Exception as e:
-            logging.error(f"Error processing file {file_path}: {e}")
+            logger.error(f"Error processing file {file_path}: {e}")
     return texts, doc_names

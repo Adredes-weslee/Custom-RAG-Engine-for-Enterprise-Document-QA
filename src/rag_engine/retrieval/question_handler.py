@@ -1,12 +1,11 @@
-import logging
+from utils.logging_setup import setup_logging
 from langchain.schema import HumanMessage
 from langchain_ollama.llms import OllamaLLM
 from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
 from langchain_core.prompts import ChatPromptTemplate
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = setup_logging()
 
 def handle_code_query(user_question: str, code_rag_chain: ConversationalRetrievalChain, llm: OllamaLLM) -> tuple:
     """

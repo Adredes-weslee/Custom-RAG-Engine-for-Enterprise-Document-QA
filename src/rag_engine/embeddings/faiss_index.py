@@ -1,8 +1,12 @@
 import faiss
 import os
-import logging
+from utils.logging_setup import setup_logging
 from typing import Optional
 import numpy as np
+
+
+# Set up logging
+logger = setup_logging()
 
 def create_faiss_index(embeddings: np.ndarray, target_dim: int) -> faiss.IndexFlatL2:
     """
@@ -28,7 +32,7 @@ def save_faiss_index(index: faiss.IndexFlatL2, file_path: str) -> None:
         file_path (str): Path to save the index.
     """
     faiss.write_index(index, file_path)
-    logging.info(f"FAISS index saved to disk as '{file_path}'.")
+    logger.info(f"FAISS index saved to disk as '{file_path}'.")
 
 def load_faiss_index(file_path: str) -> Optional[faiss.IndexFlatL2]:
     """
@@ -42,8 +46,8 @@ def load_faiss_index(file_path: str) -> Optional[faiss.IndexFlatL2]:
     """
     if os.path.exists(file_path):
         index = faiss.read_index(file_path)
-        logging.info("FAISS index loaded from disk.")
+        logger.info("FAISS index loaded from disk.")
         return index
     else:
-        logging.error(f"FAISS index file {file_path} does not exist.")
+        logger.error(f"FAISS index file {file_path} does not exist.")
         return None

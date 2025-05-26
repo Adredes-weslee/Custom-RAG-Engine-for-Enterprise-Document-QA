@@ -1,11 +1,10 @@
-import logging
+from utils.logging_setup import setup_logging
 from langchain.chat_models import AzureChatOpenAI
 from langchain.schema import HumanMessage
 from langchain_ollama.llms import OllamaLLM
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = setup_logging()
 
 def evaluate_answer_with_ollama(answer: str, question: str, ollama_llm: OllamaLLM) -> str:
     """
