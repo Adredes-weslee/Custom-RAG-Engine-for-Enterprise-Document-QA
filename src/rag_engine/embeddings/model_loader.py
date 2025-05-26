@@ -1,6 +1,13 @@
+import sys
+from pathlib import Path
 from transformers import AutoTokenizer, AutoModel
 from sentence_transformers import SentenceTransformer
 from typing import Tuple, Optional
+
+# Add project root to path for utils import
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from utils.logging_setup import setup_logging
 
 # Set up logging

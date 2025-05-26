@@ -1,15 +1,25 @@
 import streamlit as st
+import sys
+from pathlib import Path
+
+# Add project root to path for utils import
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 from config.config import *
-from utils.logging_setup import logger
-from faiss_index import load_faiss_index
-from document_store import load_documents, create_docstore
-from rag_chain import setup_rag_chain
-from question_handler import handle_question
-from streamlit_ui import setup_streamlit_ui
-from ollama_model import ollama_llm
+from utils.logging_setup import setup_logging
+from rag_engine.embeddings.faiss_index import load_faiss_index
+from rag_engine.retrieval.document_store import load_documents, create_docstore
+from rag_engine.retrieval.rag_chain import setup_rag_chain
+from rag_engine.retrieval.question_handler import handle_question
+from rag_engine.ui.streamlit_ui import setup_streamlit_ui
+from rag_engine.models.ollama_model import ollama_llm
 from sentence_transformers import SentenceTransformer
 from langchain.vectorstores import FAISS
 import pandas as pd
+
+# Set up logging
+logger = setup_logging()
 
 # Load FAISS indices
 code_faiss_index_path = './faiss_code_index.bin'
