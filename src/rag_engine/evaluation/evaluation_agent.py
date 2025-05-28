@@ -5,98 +5,63 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from utils.logging_setup import setup_logging
-from langchain.chat_models import AzureChatOpenAI
-from langchain.schema import HumanMessage
 from langchain_ollama.llms import OllamaLLM
+
+from utils.logging_setup import setup_logging
+from utils.model_config import get_judge_model
 
 # Set up logging
 logger = setup_logging()
 
-def evaluate_answer_with_ollama(answer: str, question: str, ollama_llm: OllamaLLM) -> str:
+
+def evaluate_answer_with_ollama(
+    answer: str, question: str, ollama_llm: OllamaLLM = None
+) -> str:
     """
-    Use Ollama Gemma2 to evaluate the quality of the answer based on accuracy, relevance, and completeness.
+    Use Ollama judge model to evaluate the quality of the answer based on accuracy, relevance, and completeness.
     Provide feedback on how well the answer addresses the user's question.
 
     Args:
         answer (str): The answer produced by the RAG system.
         question (str): The original user question.
-        ollama_llm (OllamaLLM): The Ollama language model instance.
+        ollama_llm (OllamaLLM, optional): The Ollama language model instance. If None, uses judge model.
 
     Returns:
         str: Evaluation feedback including scores for relevance and correctness.
     """
-    evaluation_prompt = f"""
-    You are an AI assistant. The following answer was produced for a user's question. Please evaluate its quality, considering:
+    # Use provided LLM or create judge model instance
+    if ollama_llm is None:
+        judge_model = get_judge_model()
+        ollama_llm = OllamaLLM(model=judge_model)
+        logger.info(f"🔍 Using judge model for evaluation: {judge_model}")
 
-    1. **Relevance**: Does the answer directly address the user's question?
-    2. **Correctness**: Is the information factually accurate and does it provide a solution?
-    3. **Completeness**: Is the answer thorough enough to resolve the query, or does it need more detail?
+    evaluation_prompt = f"""You are an AI assistant evaluating the quality of an answer. Please be concise and rate 1-5 for each category:
 
-    Rate the answer on a scale of 1 to 5 for each category, and explain your ratings.
+User's Question: {question}
+System's Answer: {answer}
 
-    User's Question: {question}
-    System's Answer: {answer}
+Evaluation:
+1. Relevance (1-5): How well does the answer address the question?
+2. Correctness (1-5): Is the information accurate?
+3. Completeness (1-5): Is the answer thorough enough?
 
-    Please provide your evaluation:
-    - Rating for relevance (1-5):
-    - Explanation for relevance rating:
-    - Rating for correctness (1-5):
-    - Explanation for correctness rating:
-    - Rating for completeness (1-5):
-    - Explanation for completeness rating:
-    """
-    
-    response = ollama_llm.invoke([HumanMessage(content=evaluation_prompt)])
-    evaluation_feedback = response.strip()
-    
-    # Log the LLM output to the terminal for debugging
-    logger.info(f"Evaluation Prompt: {evaluation_prompt}")
-    logger.info(f"LLM Response: {evaluation_feedback}")
-    
-    return evaluation_feedback
+Format your response as:
+Relevance: X/5 - brief explanation
+Correctness: X/5 - brief explanation  
+Completeness: X/5 - brief explanation"""
 
-##### Uncomment if you wish to use the AzureChatOpenAI model instead of the OllamaLLM model. #####
+    try:
+        # ✅ Fixed: Direct string input instead of HumanMessage
+        response = ollama_llm.invoke(evaluation_prompt)
+        evaluation_feedback = (
+            response.strip() if hasattr(response, "strip") else str(response).strip()
+        )
 
-# def evaluate_answer_with_azure(answer: str, question: str, azure_llm: AzureChatOpenAI) -> str:
-#     """
-#     Use Azure OpenAI to evaluate the quality of the answer based on accuracy, relevance, and completeness.
-#     Provide feedback on how well the answer addresses the user's question.
+        # Log for debugging (shorter logs)
+        logger.info(f"📊 Evaluation completed for question: {question[:50]}...")
 
-#     Args:
-#         answer (str): The answer produced by the RAG system.
-#         question (str): The original user question.
-#         azure_llm (AzureChatOpenAI): The Azure OpenAI language model instance.
+        return evaluation_feedback
 
-#     Returns:
-#         str: Evaluation feedback including scores for relevance and correctness.
-#     """
-#     evaluation_prompt = f"""
-#     You are an AI assistant. The following answer was produced for a user's question. Please evaluate its quality, considering:
-
-#     1. **Relevance**: Does the answer directly address the user's question?
-#     2. **Correctness**: Is the information factually accurate and does it provide a solution?
-#     3. **Completeness**: Is the answer thorough enough to resolve the query, or does it need more detail?
-
-#     Rate the answer on a scale of 1 to 5 for each category, and explain your ratings.
-
-#     User's Question: {question}
-#     System's Answer: {answer}
-
-#     Please provide your evaluation:
-#     - Rating for relevance (1-5):
-#     - Explanation for relevance rating:
-#     - Rating for correctness (1-5):
-#     - Explanation for correctness rating:
-#     - Rating for completeness (1-5):
-#     - Explanation for completeness rating:
-#     """
-    
-#     response = azure_llm.invoke([HumanMessage(content=evaluation_prompt)])
-#     evaluation_feedback = response.content.strip()
-    
-#     # Log the LLM output to the terminal for debugging
-#     logger.info(f"Evaluation Prompt: {evaluation_prompt}")
-#     logger.info(f"LLM Response: {evaluation_feedback}")
-    
-#     return evaluation_feedback
+    except Exception as e:
+        logger.error(f"❌ Evaluation failed: {e}")
+        return f"Evaluation failed: {str(e)}"
