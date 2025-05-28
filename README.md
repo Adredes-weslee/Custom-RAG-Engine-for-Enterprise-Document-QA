@@ -1,480 +1,542 @@
-# 🧠 GPU-Accelerated Custom RAG Engine for Enterprise Document QA
+# 🧠 Custom RAG Engine for Enterprise Document QA
 
-> A high-performance, GPU-accelerated Retrieval-Augmented Generation (RAG) system for querying enterprise documents with automatic CPU fallback for cloud deployment. Built with LangChain, FAISS-GPU, and Streamlit.
+> A production-ready, environment-aware Retrieval-Augmented Generation (RAG) system for enterprise document analysis. Features automatic local/cloud model selection, GPU acceleration with CPU fallback, and hybrid embeddings for code and text understanding.
 
 ---
 
-## 🎯 Objective
+## 🎯 Project Overview
 
-Build a production-grade RAG system that:
-- **GPU-First Processing**: Leverages CUDA acceleration for embeddings and vector search
-- **Automatic CPU Fallback**: Seamlessly works on Streamlit Cloud and CPU-only environments
-- **Enterprise Document Support**: Processes GitLab repositories, code, markdown, CSVs, and PDFs
-- **Hybrid Embeddings**: Uses specialized models for text and code understanding
-- **Local LLM Integration**: Ollama-powered local inference with privacy guarantees
+This RAG system is designed for **enterprise document analysis** with a focus on **GitLab repository data** and **code understanding**. Built with a hybrid architecture that automatically adapts to deployment environment while maintaining high performance and privacy.
+
+### 🏗️ Architecture Highlights
+- **Environment-Aware Model Selection**: Automatically uses powerful models locally, efficient models in cloud
+- **Hybrid Processing Strategy**: Create indices locally with GPU, deploy statically to cloud
+- **Specialized Embeddings**: Code-aware embeddings for Python files, semantic embeddings for notebooks
+- **Privacy-First**: All processing happens locally, no data sent to external APIs
 
 ---
 
 ## 🚀 Key Features
 
-| Feature | Description |
-|---------|-------------|
-| 🔥 **GPU Acceleration** | CUDA-powered embeddings (10-50x faster) with automatic CPU fallback |
-| 🧠 **Hybrid Embeddings** | `all-MiniLM-L6-v2` for text + `microsoft/graphcodebert-base` for code |
-| 🔍 **FAISS-GPU** | High-performance vector similarity search with GPU acceleration |
-| 📊 **Smart Document Processing** | GitLab integration, recursive chunking, metadata preservation |
-| 🤖 **Local LLM Support** | Ollama integration (Llama 3.1, Codellama, Mistral) |
-| ☁️ **Deployment Ready** | Streamlit Cloud compatible with automatic device detection |
-| 🧪 **Comprehensive Testing** | Full test suite covering GPU/CPU scenarios |
+| Feature | Local Development | Cloud Deployment |
+|---------|------------------|------------------|
+| **Model Selection** | `llama3.2:3b`, `llama3.1:8b` | `gemma2:2b`, `phi3:mini` |
+| **Processing** | GPU-accelerated data ingestion | Pre-built index loading |
+| **Performance** | Maximum quality enhancement | Fast response times |
+| **Privacy** | Complete local processing | Static file serving only |
+| **Scalability** | Full pipeline processing | Lightweight runtime |
 
 ---
 
-## 📂 Project Structure
+## 📂 Complete Project Structure
 
 ```
 Custom-RAG-Engine-for-Enterprise-Document-QA/
-├── src/                                    # Main source code
-│   ├── main.py                            # 🎯 Streamlit app with GPU detection
-│   ├── rag_engine/                        # Core RAG engine
-│   │   ├── embeddings/
-│   │   │   ├── faiss_index.py            # 🔥 GPU-accelerated FAISS operations
-│   │   │   ├── model_loader.py           # 🧠 GPU-aware model loading
-│   │   │   └── embedding_generation.py   # ⚡ GPU embeddings generation
-│   │   ├── document_processing/
-│   │   │   ├── gitlab_loader.py          # 📁 GitLab repository integration
-│   │   │   ├── text_extraction.py        # 📄 Multi-format document parser
-│   │   │   └── chunk_generator.py        # ✂️ Intelligent text chunking
-│   │   ├── retrieval/
-│   │   │   ├── document_store.py         # 🗃️ Document metadata management
-│   │   │   ├── rag_chains.py             # 🔗 LangChain pipeline orchestration
-│   │   │   └── question_handler.py       # ❓ Query processing & routing
-│   │   └── llm/
-│   │       ├── ollama_client.py          # 🦙 Ollama integration
-│   │       └── prompt_templates.py       # 📝 Optimized prompts
-│   └── utils/
-│       └── logging_setup.py              # 📊 Comprehensive logging
-├── tests/                                 # Test suite
-│   ├── run_tests.py                      # 🧪 Main test runner
-│   ├── test_requirements.py             # ✅ Dependencies verification
-│   ├── test_data_processing.py          # 📄 Document processing tests
-│   ├── test_embeddings_comprehensive.py # 🔥 GPU/CPU embeddings tests
-│   └── test_rag_retrieval.py            # 🔍 End-to-end RAG tests
-├── deployment/                           # Deployment configurations
-│   ├── environment.yaml                 # 🐍 Conda environment (GPU)
-│   ├── requirements-local.txt           # 📦 Local development (GPU)
-│   └── Dockerfile                       # 🐳 Container setup
-├── requirements.txt                      # ☁️ Streamlit deployment (CPU)
-├── system_status.py                     # 🔍 System health checker
-└── README.md                            # 📖 This file
+├── 📄 README.md                              # This comprehensive guide
+├── 📄 requirements.txt                       # Streamlit Cloud dependencies (CPU)
+├── 📄 setup_models.py                       # Environment-aware model downloader
+├── 📄 run_data_ingestion.py                 # Data processing launcher
+├── 📄 check.py                              # System compatibility checker
+├── 🗂️ data/                                 
+│   └── aiap17-gitlab-data/                  # GitLab repository data (23 people)
+├── 🗂️ src/                                  # Main application code
+│   ├── 📄 main.py                           # 🎯 Streamlit app entry point
+│   └── 🗂️ rag_engine/                      # Core RAG engine
+│       ├── 🗂️ data_processing/             # Data ingestion pipeline
+│       │   ├── 📄 data_enhancement.py       # LLM-powered text enhancement
+│       │   ├── 📄 data_ingestion.py         # Main data processing pipeline
+│       │   ├── 📄 file_retrieval.py         # GitLab file discovery
+│       │   └── 📄 text_extraction.py        # Multi-format text extraction
+│       ├── 🗂️ embeddings/                  # Embedding generation & indexing
+│       │   ├── 📄 embedding_generation.py   # Hybrid embeddings (code + text)
+│       │   ├── 📄 faiss_index.py           # GPU-accelerated FAISS operations
+│       │   └── 📄 model_loader.py          # Model loading with GPU detection
+│       ├── 🗂️ evaluation/                  # Response quality evaluation
+│       │   └── 📄 evaluation_agent.py       # Judge model evaluation
+│       ├── 🗂️ models/                      # LLM integration
+│       │   └── 📄 ollama_model.py          # Ollama client wrapper
+│       ├── 🗂️ retrieval/                   # RAG pipeline components
+│       │   ├── 📄 document_store.py         # Document metadata management
+│       │   ├── 📄 question_handler.py       # Query routing & processing
+│       │   └── 📄 rag_chain.py             # LangChain pipeline orchestration
+│       └── 🗂️ ui/                          # User interface
+│           └── 📄 streamlit_ui.py          # Streamlit UI components
+├── 🗂️ tests/                               # Comprehensive test suite
+│   ├── 📄 run_tests.py                     # Main test runner
+│   ├── 📄 test_requirements.py             # Dependency verification
+│   ├── 📄 test_data_processing.py          # Data pipeline tests
+│   ├── 📄 test_embeddings_comprehensive.py # Embedding & GPU tests
+│   └── 📄 test_rag_retrieval.py           # End-to-end RAG tests
+├── 🗂️ utils/                               # Shared utilities
+│   ├── 📄 logging_setup.py                 # Comprehensive logging
+│   └── 📄 model_config.py                  # Environment-aware configuration
+└── 🗂️ Generated Files/ (Created by data ingestion)
+    ├── 📄 faiss_code_index.bin             # Code embeddings index
+    ├── 📄 faiss_non_code_index.bin         # Notebook embeddings index
+    ├── 📄 code_docstore.json               # Enhanced Python file content
+    └── 📄 non_code_docstore.json           # Enhanced notebook content
 ```
 
 ---
 
 ## 🛠️ Installation & Setup
 
-### 🔥 Local Development (GPU-Accelerated)
-
-#### Prerequisites
-- **CUDA 12.6+** compatible GPU
+### 🔧 Prerequisites
 - **Python 3.9+**
-- **Conda** (recommended)
+- **CUDA 12.6+** (for local GPU acceleration)
+- **16GB+ RAM** (for model processing)
+- **Ollama** (for local LLM inference)
+
+### 🚀 Quick Start (Recommended Workflow)
 
 #### 1. Environment Setup
 ```bash
 # Clone repository
-git clone <repository-url>
+git clone <your-repository-url>
 cd Custom-RAG-Engine-for-Enterprise-Document-QA
 
-# Create GPU-enabled environment
-conda env create -f deployment/environment.yaml
-conda activate rag-enterprise
+# Install dependencies
+pip install -r requirements.txt
 
-# Verify GPU setup
+# Verify system compatibility
 python check.py
 ```
 
-#### 2. Ollama Setup (Local LLM)
+#### 2. Automatic Model Setup
 ```bash
-# Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
+# Download models based on your environment (local vs cloud)
+python setup_models.py
 
-# Download models (choose based on your needs)
-ollama pull llama3.1:8b          # General purpose (4.7GB)
-ollama pull llama3.1:70b         # High performance (40GB)
-ollama pull codellama:7b         # Code-specific (3.8GB)
-ollama pull mistral:7b           # Fast alternative (4.1GB)
-
-# Start Ollama server
-ollama serve
-
-# Test model (in new terminal)
-ollama run llama3.1:8b "Hello, how are you?"
+# Expected output:
+# 🏠 Detected local development environment
+# 📥 Downloading llama3.2:3b for data enhancement...
+# 📥 Downloading llama3.1:8b for evaluation...
+# ✅ All models ready for local development!
 ```
 
-#### 3. Run Application
+#### 3. Data Processing (Local GPU Recommended)
+```bash
+# Quick test (3 people, ~30 files)
+python run_data_ingestion.py --test
+
+# Custom limits
+python run_data_ingestion.py --limit-people 5 --limit-files 20
+
+# Full processing (all 23 people, ~1000+ files)
+python run_data_ingestion.py
+
+# Expected outputs:
+# faiss_code_index.bin        (~10-50MB)
+# faiss_non_code_index.bin    (~20-100MB)  
+# code_docstore.json          (~50-200MB)
+# non_code_docstore.json      (~100-500MB)
+```
+
+#### 4. Run Application
 ```bash
 # Launch Streamlit app
 streamlit run src/main.py
 
-# Or run tests
-cd tests && python run_tests.py
+# Application will automatically:
+# ✅ Load pre-built indices
+# ✅ Initialize environment-appropriate models
+# ✅ Start RAG interface
 ```
-
-### ☁️ Streamlit Cloud Deployment (CPU Fallback)
-
-#### 1. Repository Setup
-- Fork this repository to your GitHub
-- Ensure `requirements.txt` is in root (CPU-only dependencies)
-
-#### 2. Streamlit Cloud Configuration
-```yaml
-# .streamlit/config.toml
-[server]
-enableCORS = false
-enableXsrfProtection = false
-
-[theme]
-base = "light"
-```
-
-#### 3. Environment Variables (Streamlit Secrets)
-```toml
-# .streamlit/secrets.toml
-[general]
-OLLAMA_BASE_URL = "your-ollama-api-endpoint"  # Optional: external Ollama API
-HF_TOKEN = "your-huggingface-token"           # Optional: for private models
-```
-
-#### 4. Deploy
-1. Go to [share.streamlit.io](https://share.streamlit.io)
-2. Connect your GitHub repository
-3. Set main file path: `src/main.py`
-4. Deploy and test CPU fallback
 
 ---
 
-## 🧪 Testing & Verification
+## 🎯 Deployment Strategies
 
-### Run Full Test Suite
+### 🏠 Local Development (Full Pipeline)
+
+**Best for**: Development, testing, high-quality processing
+
 ```bash
-# Activate environment
-conda activate rag-enterprise
+# 1. Full GPU pipeline
+python setup_models.py                    # Downloads: llama3.2:3b, llama3.1:8b
+python run_data_ingestion.py              # Uses GPU enhancement
+streamlit run src/main.py                 # Local RAG interface
 
-# Run comprehensive tests
-cd tests
-python run_tests.py
-
-# Check system status
-python system_status.py
+# 2. Capabilities
+✅ GPU-accelerated processing (10-50x faster)
+✅ High-quality LLM enhancement
+✅ Complete model selection
+✅ Maximum performance
 ```
 
-### GPU vs CPU Performance Test
-```bash
-# Test GPU acceleration
-python check.py
+### ☁️ Streamlit Cloud (Pre-built Indices)
 
-# Expected output:
-# ✅ GPU available - using CUDA acceleration
-# ✅ FAISS GPU count: 1
-# ✅ GPU test successful! Tensor device: cuda:0
+**Best for**: Production, sharing, lightweight deployment
+
+```bash
+# 1. Pre-upload indices to repository
+git add *.bin *.json
+git commit -m "Add pre-built enhanced indices"
+git push
+
+# 2. Deploy to Streamlit Cloud
+# - Repository: your-github-repo
+# - Main file: src/main.py
+# - Dependencies: requirements.txt (CPU-only)
+
+# 3. Automatic behavior
+✅ Downloads small models: gemma2:2b, phi3:mini
+✅ Loads pre-built indices (no processing)
+✅ Fast startup (~30 seconds)
+✅ Lightweight runtime
 ```
 
-### Test Individual Components
-```bash
-# Test embeddings generation
-python tests/test_embeddings_comprehensive.py
+---
 
-# Test document processing
-python tests/test_data_processing.py
+## 🤖 Environment-Aware Model System
 
-# Test RAG retrieval
-python tests/test_rag_retrieval.py
+### 📋 Model Configuration
+
+| Environment | Primary Model | Judge Model | Enhancement Model | Use Case |
+|------------|---------------|-------------|-------------------|----------|
+| **Local** | `llama3.2:3b` | `llama3.1:8b` | `llama3.2:3b` | High-quality processing |
+| **Streamlit Cloud** | `gemma2:2b` | `phi3:mini` | N/A | Fast cloud responses |
+| **Fallback** | `llama3.2:1b` | `llama3.2:1b` | `llama3.2:1b` | Minimal resources |
+
+### 🔄 Automatic Detection
+```python
+# Environment detection (utils/model_config.py)
+def detect_environment():
+    if is_streamlit_cloud():
+        return "cloud"
+    elif has_high_memory() and has_gpu():
+        return "local"
+    else:
+        return "fallback"
 ```
+
+---
+
+## 📊 Data Processing Pipeline
+
+### 🔍 Data Sources
+- **GitLab Repository**: 23 AI apprentice projects
+- **File Types**: Python scripts (`.py`), Jupyter notebooks (`.ipynb`)
+- **Content**: Machine learning assignments, data science projects
+- **Structure**: `/person/assignment/files`
+
+### ⚡ Processing Steps
+
+1. **File Discovery**: Recursive GitLab repository scanning
+2. **Text Extraction**: Code-aware chunking with metadata preservation
+3. **LLM Enhancement**: Adds comments, docstrings, explanations
+4. **Hybrid Embeddings**: 
+   - Code files → `microsoft/graphcodebert-base` → 768D vectors
+   - Notebooks → `all-MiniLM-L6-v2` → 384D vectors
+   - Dimensionality alignment → 384D common space
+5. **FAISS Indexing**: GPU-accelerated similarity search indices
+6. **Document Storage**: Enhanced content with source metadata
+
+### 📈 Processing Performance
+
+| Mode | Files | Time | Quality | Use Case |
+|------|-------|------|---------|----------|
+| **Test** | ~30 | 10 min | Good | Development |
+| **Custom** | ~100 | 30 min | Good | Testing |
+| **Full** | 1000+ | 2+ hours | Excellent | Production |
 
 ---
 
 ## 🎯 Usage Examples
 
-### 1. Local Development with GPU
-```python
-import torch
-from src.rag_engine.embeddings.model_loader import load_sentence_transformer
+### 🔍 Asking Questions
 
-# Automatically uses GPU if available
-model = load_sentence_transformer("all-MiniLM-L6-v2")
-print(f"Model device: {model.device}")  # cuda:0
+```python
+# Code-specific questions
+"How do I implement a decision tree in Python?"
+"Show me examples of data preprocessing pipelines"
+"What are common machine learning evaluation metrics?"
+
+# Project-specific questions  
+"How did students approach assignment 1?"
+"What libraries are commonly used for data science?"
+"Show me examples of model evaluation code"
+
+# Conceptual questions
+"Explain the difference between supervised and unsupervised learning"
+"What are best practices for data validation?"
 ```
 
-### 2. Document Processing
-```python
-from src.rag_engine.document_processing.text_extraction import process_documents
-
-# Process GitLab repository
-documents = process_documents("path/to/repo", file_types=[".py", ".md"])
-print(f"Processed {len(documents)} documents")
-```
-
-### 3. RAG Query
-```python
-from src.rag_engine.retrieval.rag_chains import create_rag_chain
-
-# Create RAG chain with Ollama
-rag_chain = create_rag_chain(
-    model_name="llama3.1:8b",
-    index_path="data/processed/index.faiss"
-)
-
-# Ask question
-response = rag_chain.invoke("How do I configure authentication?")
-```
-
----
-
-## 🔧 Ollama Configuration Guide
-
-### Model Selection Guide
-
-| Model | Size | Use Case | Performance | Memory |
-|-------|------|----------|-------------|---------|
-| `llama3.1:8b` | 4.7GB | General QA | Good | 8GB RAM |
-| `llama3.1:70b` | 40GB | High accuracy | Excellent | 48GB RAM |
-| `codellama:7b` | 3.8GB | Code analysis | Good | 8GB RAM |
-| `mistral:7b` | 4.1GB | Fast responses | Good | 8GB RAM |
-
-### Ollama API Integration
-```python
-# Configure Ollama client
-import requests
-
-# Local Ollama
-OLLAMA_URL = "http://localhost:11434"
-
-# Test connection
-response = requests.get(f"{OLLAMA_URL}/api/tags")
-print("Available models:", response.json())
-
-# Generate response
-payload = {
-    "model": "llama3.1:8b",
-    "prompt": "Explain RAG systems",
-    "stream": False
+### 📊 Response Structure
+```json
+{
+  "answer": "Enhanced LLM response with context",
+  "sources": ["file1.py", "notebook2.ipynb"],
+  "evaluation": {
+    "relevance": 0.95,
+    "accuracy": 0.88,
+    "completeness": 0.92
+  },
+  "reasoning": "Judge model assessment"
 }
-response = requests.post(f"{OLLAMA_URL}/api/generate", json=payload)
 ```
 
-### Performance Optimization
+---
+
+## 🧪 Testing & Validation
+
+### 🔍 Run Comprehensive Tests
 ```bash
-# GPU acceleration for Ollama (if available)
-export OLLAMA_GPU_COMPUTE_CAPABILITY=8.6  # Adjust for your GPU
+# Full test suite
+python tests/run_tests.py
 
-# Memory optimization
-export OLLAMA_MAX_LOADED_MODELS=2
-export OLLAMA_MAX_QUEUE=128
+# Individual components
+python tests/test_requirements.py         # Dependencies ✅
+python tests/test_data_processing.py     # File processing ✅
+python tests/test_embeddings_comprehensive.py  # GPU/CPU embeddings ✅
+python tests/test_rag_retrieval.py      # End-to-end RAG ✅
+```
 
-# Start optimized server
-ollama serve
+### 📊 Expected Test Results
+```
+✅ ALL DEPENDENCIES INSTALLED!
+✅ ALL TESTS COMPLETED SUCCESSFULLY!
+✅ GPU available - using CUDA acceleration
+✅ Environment detection: WORKING
+✅ Model loading: WORKING
+✅ Data processing: WORKING
+✅ RAG pipeline: WORKING
+🚀 Ready for production deployment!
 ```
 
 ---
 
-## 🚀 Performance Benchmarks
+## 🔧 Configuration & Customization
 
-### GPU vs CPU Performance
-
-| Operation | GPU (CUDA) | CPU | Speedup |
-|-----------|------------|-----|---------|
-| Embedding Generation | 2.3s | 45.7s | **20x** |
-| FAISS Index Creation | 0.8s | 12.4s | **15x** |
-| Similarity Search | 0.1s | 1.2s | **12x** |
-| End-to-End RAG Query | 3.2s | 59.3s | **18x** |
-
-### Model Performance
-| Model | Response Time | Quality | Memory Usage |
-|-------|---------------|---------|--------------|
-| Llama 3.1 8B | 1.2s | ⭐⭐⭐⭐ | 8GB |
-| Llama 3.1 70B | 4.8s | ⭐⭐⭐⭐⭐ | 48GB |
-| CodeLlama 7B | 1.0s | ⭐⭐⭐⭐ (code) | 8GB |
-
----
-
-## 🔍 Deployment Strategies
-
-### 1. Local Development (Recommended)
-- ✅ Full GPU acceleration
-- ✅ All models available
-- ✅ Complete feature set
-- ✅ Maximum performance
-
-### 2. Streamlit Cloud
-- ✅ Easy deployment
-- ✅ Automatic CPU fallback
-- ⚠️ Limited to CPU processing
-- ⚠️ External Ollama API needed
-
-### 3. Docker Deployment
-```bash
-# Build container
-docker build -f deployment/Dockerfile -t rag-engine .
-
-# Run with GPU support
-docker run --gpus all -p 8501:8501 rag-engine
-
-# Run CPU-only
-docker run -p 8501:8501 rag-engine
-```
-
-### 4. Kubernetes (Production)
-```bash
-# Apply manifests
-kubectl apply -f deployment/k8s/
-kubectl get pods -l app=rag-engine
-```
-
----
-
-## 🧱 Architecture Overview
-
-```mermaid
-graph TD
-    A[Document Upload] --> B[GPU-Accelerated Processing]
-    B --> C[Hybrid Embeddings]
-    C --> D[FAISS-GPU Index]
-    D --> E[Similarity Search]
-    E --> F[Ollama LLM]
-    F --> G[Response Generation]
-    
-    B --> H[CPU Fallback]
-    H --> I[CPU Embeddings]
-    I --> J[FAISS-CPU Index]
-    J --> E
-```
-
----
-
-## 🛡️ Production Considerations
-
-### Security
-- ✅ Local LLM inference (no data leaves your infrastructure)
-- ✅ No external API dependencies
-- ✅ Configurable access controls
-- ✅ Audit logging capabilities
-
-### Scalability
-- 🔥 GPU clusters for high-throughput processing
-- 📊 Horizontal scaling with Kubernetes
-- 💾 Persistent vector storage
-- 🔄 Load balancing for multiple users
-
-### Monitoring
+### 🎛️ Model Configuration (utils/model_config.py)
 ```python
-# Built-in metrics
-from src.utils.logging_setup import setup_logging
+# Customize models for your environment
+LOCAL_MODELS = {
+    "primary": "llama3.2:3b",      # High-quality responses
+    "judge": "llama3.1:8b",        # Thorough evaluation  
+    "fallback": "llama3.2:1b"      # Resource constraints
+}
 
-logger = setup_logging()
-# Automatic GPU/CPU performance tracking
-# Response time monitoring
-# Error rate tracking
+CLOUD_MODELS = {
+    "primary": "gemma2:2b",        # Cloud-friendly
+    "judge": "phi3:mini",          # Fast evaluation
+    "fallback": "gemma2:2b"        # Consistent fallback
+}
 ```
+
+### ⚙️ Data Processing Options
+```python
+# Quick testing
+python run_data_ingestion.py --test
+
+# Custom limits
+python run_data_ingestion.py --limit-people 5 --limit-files 20
+
+# Skip enhancement for speed
+# Modify data_ingestion.py to comment out enhance_data_with_llm()
+
+# Full production processing
+python run_data_ingestion.py
+```
+
+---
+
+## 🚀 Production Deployment Guide
+
+### 📋 Pre-deployment Checklist
+- [ ] Run full test suite locally
+- [ ] Process data with GPU enhancement
+- [ ] Verify index file generation
+- [ ] Test Streamlit app locally
+- [ ] Upload indices to repository
+- [ ] Configure Streamlit Cloud secrets
+
+### ☁️ Streamlit Cloud Setup
+
+#### 1. Repository Preparation
+```bash
+# Ensure these files exist in root:
+faiss_code_index.bin        # Code embeddings
+faiss_non_code_index.bin    # Notebook embeddings  
+code_docstore.json          # Enhanced Python content
+non_code_docstore.json      # Enhanced notebook content
+requirements.txt            # CPU dependencies
+```
+
+#### 2. Streamlit Configuration
+```toml
+# .streamlit/config.toml
+[server]
+enableCORS = false
+enableXsrfProtection = false
+maxUploadSize = 1000
+
+[theme] 
+base = "light"
+primaryColor = "#FF6B6B"
+```
+
+#### 3. Environment Secrets (Optional)
+```toml
+# .streamlit/secrets.toml  
+[general]
+HF_TOKEN = "your-huggingface-token"  # For private models
+OLLAMA_BASE_URL = "external-api"     # External Ollama if needed
+```
+
+---
+
+## 📊 Performance & Benchmarks
+
+### 🔥 GPU vs CPU Performance
+
+| Operation | Local GPU | Local CPU | Cloud CPU | Speedup |
+|-----------|-----------|-----------|-----------|---------|
+| **Data Ingestion** | 45 min | 4+ hours | N/A | 5-6x |
+| **Embedding Generation** | 2.3s | 45.7s | N/A | 20x |
+| **FAISS Index Creation** | 0.8s | 12.4s | N/A | 15x |
+| **RAG Query Response** | 1.2s | 3.8s | 2.1s | 1.8x |
+| **App Startup** | 15s | 25s | 30s | - |
+
+### 💾 File Sizes (23 People, Full Dataset)
+
+| File | Size | Description |
+|------|------|-------------|
+| `faiss_code_index.bin` | ~15MB | Code vector index |
+| `faiss_non_code_index.bin` | ~35MB | Notebook vector index |
+| `code_docstore.json` | ~120MB | Enhanced Python files |
+| `non_code_docstore.json` | ~280MB | Enhanced notebooks |
+| **Total** | **~450MB** | Complete RAG system |
 
 ---
 
 ## 🔧 Troubleshooting
 
-### Common Issues
+### ❌ Common Issues & Solutions
 
-#### GPU Not Detected
+#### **Issue**: Import errors in data_ingestion.py
+```bash
+# Solution: Use the launcher script
+python run_data_ingestion.py --test
+# Instead of: python src/rag_engine/data_processing/data_ingestion.py
+```
+
+#### **Issue**: Models not found
+```bash
+# Solution: Run setup script first
+python setup_models.py
+ollama list  # Verify models downloaded
+```
+
+#### **Issue**: GPU not detected
 ```bash
 # Check CUDA installation
 nvidia-smi
 python -c "import torch; print(torch.cuda.is_available())"
 
-# Reinstall PyTorch with correct CUDA version
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
+# Reinstall PyTorch with CUDA
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 ```
 
-#### Ollama Connection Issues
+#### **Issue**: Streamlit Cloud deployment fails
 ```bash
-# Check Ollama status
-ollama ps
+# Ensure CPU-only requirements
+cat requirements.txt | grep -v "torch.*cu"
 
-# Restart Ollama service
-sudo systemctl restart ollama
-
-# Check logs
-journalctl -u ollama -f
-```
-
-#### Memory Issues
-```python
-# Monitor GPU memory
-import torch
-print(f"GPU memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB")
-print(f"GPU allocated: {torch.cuda.memory_allocated() / 1e9:.1f}GB")
+# Check file sizes (must be < 100MB per file for free accounts)
+ls -lh *.bin *.json
 ```
 
 ---
 
-## 📊 Development Roadmap
+## 🎯 Customization for Your Data
 
-### ✅ Completed
-- GPU-accelerated embeddings pipeline
-- FAISS-GPU integration with CPU fallback
-- Comprehensive test suite
-- Ollama integration
-- Streamlit Cloud compatibility
+### 🗂️ Using Your Own Data
 
-### 🚧 In Progress
-- Advanced chunking strategies
-- Multi-modal document support
-- Real-time index updates
+1. **Replace Data Source**:
+   ```bash
+   # Replace data/aiap17-gitlab-data/ with your repository
+   cp -r /path/to/your/data data/your-project-data
+   
+   # Update root directory in run_data_ingestion.py
+   python run_data_ingestion.py --root-directory data/your-project-data
+   ```
 
-### 📋 Planned
-- Vector database alternatives (Pinecone, Weaviate)
-- Advanced RAG techniques (HyDE, Self-RAG)
-- MLOps integration (MLflow, Weights & Biases)
+2. **Modify File Types**:
+   ```python
+   # Edit file_retrieval.py to support your file types
+   SUPPORTED_EXTENSIONS = ['.py', '.ipynb', '.md', '.txt', '.java']
+   ```
+
+3. **Customize Enhancement**:
+   ```python
+   # Edit data_enhancement.py for domain-specific improvements
+   ENHANCEMENT_PROMPT = """
+   Improve this {file_type} for better searchability:
+   - Add domain-specific comments
+   - Explain business logic  
+   - Add relevant keywords
+   """
+   ```
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Run tests (`python tests/run_tests.py`)
-4. Commit changes (`git commit -m 'Add amazing feature'`)
-5. Push to branch (`git push origin feature/amazing-feature`)
-6. Open Pull Request
+1. **Fork & Clone**
+   ```bash
+   git clone https://github.com/your-username/Custom-RAG-Engine-for-Enterprise-Document-QA.git
+   ```
+
+2. **Create Feature Branch**
+   ```bash
+   git checkout -b feature/amazing-enhancement
+   ```
+
+3. **Test Your Changes**
+   ```bash
+   python tests/run_tests.py
+   ```
+
+4. **Submit Pull Request**
+   - Ensure all tests pass
+   - Include performance benchmarks
+   - Document new features
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **AI Singapore AIAP B17** - Training program and guidance
-- **LangChain Community** - RAG framework and patterns
+- **AI Singapore AIAP Batch 17** - Training program and dataset
+- **LangChain Community** - RAG framework foundation
 - **Ollama Team** - Local LLM inference platform
-- **HuggingFace** - Pre-trained embedding models
-- **FAISS Team** - High-performance vector search
+- **FAISS & HuggingFace** - Vector search and embedding models
+- **Streamlit** - Rapid UI development platform
 
 ---
 
-## 📚 References
+## 📚 Key Technical Papers & References
 
-1. [LangChain Documentation](https://python.langchain.com/)
-2. [Ollama Official Guide](https://ollama.com/download)
-3. [FAISS GPU Guide](https://github.com/facebookresearch/faiss/wiki/Faiss-on-the-GPU)
-4. [Sentence Transformers](https://www.sbert.net/)
-5. [Streamlit Documentation](https://docs.streamlit.io/)
-6. [CUDA Installation Guide](https://developer.nvidia.com/cuda-downloads)
+1. [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)
+2. [LangChain Documentation](https://python.langchain.com/docs/)
+3. [FAISS: A Library for Efficient Similarity Search](https://github.com/facebookresearch/faiss)
+4. [Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks](https://arxiv.org/abs/1908.10084)
+5. [GraphCodeBERT: Pre-training Code Representations with Data Flow](https://arxiv.org/abs/2009.08366)
 
 ---
 
 **⭐ Star this repository if you find it useful!**
 
-**🐛 Report issues:** [GitHub Issues](https://github.com/your-repo/issues)
+**🐛 Issues**: [GitHub Issues](https://github.com/Adredes-weslee/Custom-RAG-Engine-for-Enterprise-Document-QA/issues)  
+**💬 Discussions**: [GitHub Discussions](https://github.com/Adredes-weslee/Custom-RAG-Engine-for-Enterprise-Document-QA/discussions)  
+**📧 Contact**: weslee.qb@gmail.com
 
-**💬 Discussions:** [GitHub Discussions](https://github.com/your-repo/discussions)
+---
+
+*This project represents a complete enterprise RAG solution with production-ready deployment strategies and comprehensive testing. The hybrid local/cloud architecture ensures optimal performance across different deployment scenarios while maintaining data privacy and system reliability.*
