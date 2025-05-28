@@ -1,4 +1,4 @@
-# requirements.txt (CPU-only for Streamlit Community Cloud deployment)
+# deployment/requirements-local.txt (GPU version for local development)
 
 # Core Data Processing
 pandas==2.2.3
@@ -21,14 +21,14 @@ langchain_experimental==0.3.4
 langchain-huggingface==0.2.0
 langchain-ollama==0.3.3
 
-# PyTorch (CPU-only for Streamlit deployment)
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.7.0+cpu
-torchvision==0.22.0+cpu
-torchaudio==2.7.0+cpu
+# PyTorch (GPU-first with CPU fallback) - Updated to CUDA 12.6
+--extra-index-url https://download.pytorch.org/whl/cu126
+torch==2.7.0+cu126
+torchvision==0.22.0+cu126
+torchaudio==2.7.0+cu126
 
-# FAISS (CPU version for Streamlit)
-faiss-cpu==1.9.0
+# FAISS (GPU version)
+faiss-gpu==1.9.0
 
 # Web Interface
 streamlit==1.45.1
