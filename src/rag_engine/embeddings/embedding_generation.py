@@ -1,13 +1,17 @@
-import torch
-import numpy as np
-from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModel
-from sentence_transformers import SentenceTransformer
-from typing import List, Any
+from typing import List
 
-def generate_code_embeddings(texts: List[str], code_tokenizer: AutoTokenizer, code_model: AutoModel) -> List[np.ndarray]:
+import numpy as np
+import torch
+from sentence_transformers import SentenceTransformer
+from tqdm import tqdm
+from transformers import AutoModel, AutoTokenizer
+
+
+def generate_code_embeddings(
+    texts: List[str], code_tokenizer: AutoTokenizer, code_model: AutoModel
+) -> List[np.ndarray]:
     """
-    Generate embeddings for Python files using GraphCodeBERT.
+    Generate embeddings for Python files using GraphCodeBERT with GPU acceleration.
 
     Args:
         texts (List[str]): List of texts to generate embeddings for.
@@ -18,14 +22,24 @@ def generate_code_embeddings(texts: List[str], code_tokenizer: AutoTokenizer, co
         List[np.ndarray]: List of embeddings.
     """
     embeddings = []
+    device = next(code_model.parameters()).device  # Get the device of the model
+
     for text in tqdm(texts, desc="Generating code embeddings"):
-        inputs = code_tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=512)
+        inputs = code_tokenizer(
+            text, return_tensors="pt", padding=True, truncation=True, max_length=512
+        )
+        # Move inputs to the same device as the model
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+
         with torch.no_grad():
             outputs = code_model(**inputs)
         embeddings.append(outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy())
     return embeddings
 
-def generate_sentence_embeddings(texts: List[str], sentence_model: SentenceTransformer) -> List[np.ndarray]:
+
+def generate_sentence_embeddings(
+    texts: List[str], sentence_model: SentenceTransformer
+) -> List[np.ndarray]:
     """
     Generate embeddings for Jupyter notebooks using SentenceTransformer.
 
@@ -37,6 +51,7 @@ def generate_sentence_embeddings(texts: List[str], sentence_model: SentenceTrans
         List[np.ndarray]: List of embeddings.
     """
     return sentence_model.encode(texts, show_progress_bar=True)
+
 
 def project_embeddings(embeddings: np.ndarray, target_dim: int) -> np.ndarray:
     """
