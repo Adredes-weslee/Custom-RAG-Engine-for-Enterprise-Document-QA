@@ -1,178 +1,148 @@
-import streamlit as st
-from question_handler import handle_question
-from langchain_ollama.llms import OllamaLLM
-from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
-# from evaluation_agent import evaluate_answer_with_azure
-from evaluation_agent import evaluate_answer_with_ollama
-from langchain.chat_models import AzureChatOpenAI
-from config.config import endpoint, api_key, model, api_version, model_version
+import sys
+from pathlib import Path
 
-def setup_streamlit_ui(llm: OllamaLLM, code_rag_chain: ConversationalRetrievalChain, non_code_rag_chain: ConversationalRetrievalChain) -> None:
+# Add project root to path for utils import
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+import streamlit as st
+from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
+from langchain_ollama.llms import OllamaLLM
+
+# ✅ Fixed import paths
+from src.rag_engine.evaluation.evaluation_agent import evaluate_answer_with_ollama
+from src.rag_engine.retrieval.question_handler import handle_question
+from utils.logging_setup import setup_logging
+from utils.model_config import get_judge_model, get_primary_model
+
+logger = setup_logging()
+
+
+def setup_streamlit_ui(
+    llm: OllamaLLM = None,
+    code_rag_chain: ConversationalRetrievalChain = None,
+    non_code_rag_chain: ConversationalRetrievalChain = None,
+) -> None:
     """
-    Set up the Streamlit UI for user interaction.
+    Set up the Streamlit UI for user interaction with environment-aware model selection.
 
     Args:
-        llm (OllamaLLM): Language model instance.
+        llm (OllamaLLM, optional): Language model instance. If None, uses primary model.
         code_rag_chain (ConversationalRetrievalChain): RAG chain instance for code-related questions.
         non_code_rag_chain (ConversationalRetrievalChain): RAG chain instance for non-code-related questions.
     """
-    st.title("AIAP Batch 17 Repository Q&A Platform")
+    # Initialize primary model if not provided
+    if llm is None:
+        primary_model = get_primary_model()
+        llm = OllamaLLM(model=primary_model)
+        logger.info(f"🎯 Initialized primary model for UI: {primary_model}")
 
-    if 'chat_history' not in st.session_state:
+    st.title("🧠 GPU-Accelerated RAG Engine - Enterprise Document Q&A")
+    st.markdown("*Environment-aware model selection with automatic GPU/CPU fallback*")
+
+    # Show current model configuration
+    with st.sidebar:
+        st.subheader("🤖 Model Configuration")
+        try:
+            from utils.model_config import ModelConfig
+
+            env = ModelConfig.detect_environment()
+            config = ModelConfig.get_model_config(env)
+            st.info(f"**Environment:** {env}")
+            st.info(f"**Primary Model:** {config['primary']}")
+            st.info(f"**Judge Model:** {config['judge']}")
+        except Exception as e:
+            st.warning(f"Model config display error: {e}")
+
+    if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
     st.sidebar.subheader("Commonly Asked Questions")
     common_questions = [
-        "How does this PyTorch implementation of sentiment analysis compare to best practices? (Please provide your code)",
-        "Is my TensorFlow CNN implementation efficient compared to similar models? (Please include your code for evaluation)",
-        "Are the contextual embeddings in my NLP model implemented correctly? (Submit your code for evaluation)",
-        "Does my Flask REST API setup follow best coding practices? (Please provide your code)",
-        "Can you evaluate the correctness of my supervised vs. unsupervised learning implementation? (Include your code for comparison)",
-        "How well does my fine-tuned BERT model adhere to best practices? (Submit your code for evaluation)",
-        "Is my transfer learning setup optimal? (Please include your code for evaluation)",
-        "How does my approach to deploying a machine learning model using Docker compare to best practices? (Submit your code for review)",
-        "Is my GAN implementation correct, and does it follow best practices? (Please provide your code)",
-        "How does my handling of imbalanced datasets compare to best practices? (Submit your code for evaluation)"
+        "How does this PyTorch implementation compare to best practices?",
+        "Is my TensorFlow CNN implementation efficient?",
+        "Are my NLP embeddings implemented correctly?",
+        "Does my Flask API follow best practices?",
+        "How well does my model training code work?",
     ]
 
     for idx, question in enumerate(common_questions):
         if st.sidebar.button(question, key=f"common_question_{idx}"):
             st.session_state.common_question = question
 
-    st.sidebar.subheader("Last Query")
-    if st.session_state.chat_history:
-        # Find the last user query
-        last_query = next((msg["content"] for msg in reversed(st.session_state.chat_history) if msg["role"] == "user"), None)
-        if last_query and st.sidebar.button(last_query, key="last_query"):
-            st.session_state.common_question = last_query
-
-    st.subheader("Chat History")
-    for i, message in enumerate(st.session_state.chat_history):
+    # Chat interface
+    st.subheader("💬 Chat History")
+    for message in st.session_state.chat_history:
         with st.chat_message(message["role"]):
             st.write(message["content"])
             if "reasoning" in message:
-                with st.expander("View Reasoning and Code"):
+                with st.expander("🧠 View Reasoning"):
                     st.write(message["reasoning"])
             if message["role"] == "assistant" and "evaluation_feedback" in message:
-                st.write(f"**Evaluation Feedback:** {message['evaluation_feedback']}")
+                with st.expander("📊 Evaluation Feedback"):
+                    st.write(message["evaluation_feedback"])
 
+    # Input handling
     pre_filled_question = st.session_state.get("common_question", "")
-    user_question = st.chat_input("Ask your question here:")
+    user_question = st.chat_input("Ask your question here...")
 
     if pre_filled_question and not user_question:
         user_question = pre_filled_question
         st.session_state.common_question = ""
 
     if user_question:
-        st.session_state.chat_input = ""
+        # Add user message
         st.session_state.chat_history.append({"role": "user", "content": user_question})
+
         with st.chat_message("user"):
             st.write(user_question)
 
+        # Generate response
         with st.chat_message("assistant"):
-            with st.spinner("Retrieving answer..."):
-                answer, retrieved_docs, reasoning = handle_question(user_question, code_rag_chain, non_code_rag_chain, llm)
-                st.write(answer)
-                with st.expander("View Reasoning"):
-                    st.write(reasoning)
-                if retrieved_docs:
-                    with st.expander("Retrieved Documents"):
-                        for doc in retrieved_docs:
-                            st.write(f"**Document Source:** {doc.metadata.get('source', 'Unknown')}")
-                            st.write(f"{doc.page_content[:500]}")
-        
-        # Evaluate the answer using Ollama Gemma2
-        ollama_llm = OllamaLLM(model="gemma2")
-        evaluation_feedback = evaluate_answer_with_ollama(answer, user_question, ollama_llm)
-                
-        ##### Uncomment if using AzureChatOpenAI model instead of OllamaLLM model. #####
-        
-        # # Evaluate the answer using Azure OpenAI
-        # azure_llm = AzureChatOpenAI(
-        #     azure_endpoint=endpoint,
-        #     openai_api_key=api_key,
-        #     model_name=model,
-        #     openai_api_version=api_version,
-        #     model_version=model_version
-        # )
-        # evaluation_feedback = evaluate_answer_with_azure(answer, user_question, azure_llm)
-        
-        st.session_state.chat_history.append({
-            "role": "assistant",
-            "content": answer,
-            "reasoning": reasoning,
-            "evaluation_feedback": evaluation_feedback
-        })
+            with st.spinner("🔍 Processing with RAG engine..."):
+                try:
+                    answer, retrieved_docs, reasoning = handle_question(
+                        user_question, code_rag_chain, non_code_rag_chain, llm
+                    )
+                    st.write(answer)
 
-        st.subheader("Evaluation Feedback")
-        st.write(evaluation_feedback)
-        
-##### The following code snippet is for using the AzureChatOpenAI model instead of the OllamaLLM model. #####
+                    with st.expander("🧠 View Reasoning"):
+                        st.write(reasoning)
 
+                    if retrieved_docs:
+                        with st.expander("📄 Retrieved Documents"):
+                            for doc in retrieved_docs:
+                                st.write(
+                                    f"**Source:** {doc.metadata.get('source', 'Unknown')}"
+                                )
+                                st.write(f"{doc.page_content[:300]}...")
 
-# import streamlit as st
-# from question_handler import handle_question
-# from langchain.chat_models import AzureChatOpenAI
-# from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
+                    # Evaluate the answer
+                    with st.spinner("📊 Evaluating response quality..."):
+                        try:
+                            judge_model = get_judge_model()
+                            ollama_judge = OllamaLLM(model=judge_model)
+                            evaluation_feedback = evaluate_answer_with_ollama(
+                                answer, user_question, ollama_judge
+                            )
+                        except Exception as e:
+                            logger.error(f"❌ Evaluation failed: {e}")
+                            evaluation_feedback = "Evaluation temporarily unavailable."
 
-# def setup_streamlit_ui(llm: AzureChatOpenAI, code_rag_chain: ConversationalRetrievalChain, non_code_rag_chain: ConversationalRetrievalChain) -> None:
-#     """
-#     Set up the Streamlit UI for user interaction.
+                    # Add assistant message with evaluation
+                    st.session_state.chat_history.append(
+                        {
+                            "role": "assistant",
+                            "content": answer,
+                            "reasoning": reasoning,
+                            "evaluation_feedback": evaluation_feedback,
+                        }
+                    )
 
-#     Args:
-#         llm (AzureChatOpenAI): Language model instance.
-#         code_rag_chain (ConversationalRetrievalChain): RAG chain instance for code-related questions.
-#         non_code_rag_chain (ConversationalRetrievalChain): RAG chain instance for non-code-related questions.
-#     """
-#     st.title("AIAP Batch Repository Q&A Platform")
+                    # Show evaluation
+                    with st.expander("📊 Quality Evaluation"):
+                        st.write(evaluation_feedback)
 
-#     if 'chat_history' not in st.session_state:
-#         st.session_state.chat_history = []
-
-#     st.sidebar.subheader("Commonly Asked Questions")
-#     common_questions = [
-#         "How do I perform sentiment analysis using PyTorch?",
-#         "Can you provide an example of a CNN implementation in TensorFlow?",
-#         "What are contextual embeddings and how are they used in NLP?",
-#         "How do I set up a REST API with Flask?",
-#         "What is the difference between supervised and unsupervised learning?"
-#     ]
-
-#     for question in common_questions:
-#         if st.sidebar.button(question):
-#             st.session_state.common_question = question
-
-#     st.subheader("Chat History")
-#     for message in st.session_state.chat_history:
-#         with st.chat_message(message["role"]):
-#             st.write(message["content"])
-#             if "reasoning" in message:
-#                 with st.expander("View Reasoning and Code"):
-#                     st.write(message["reasoning"])
-
-#     pre_filled_question = st.session_state.get("common_question", "")
-#     user_question = st.chat_input("Ask your question here:")
-
-#     if pre_filled_question and not user_question:
-#         user_question = pre_filled_question
-#         st.session_state.common_question = ""
-
-#     if user_question:
-#         st.session_state.chat_input = ""
-#         st.session_state.chat_history.append({"role": "user", "content": user_question})
-#         with st.chat_message("user"):
-#             st.write(user_question)
-
-#         with st.chat_message("assistant"):
-#             with st.spinner("Retrieving answer..."):
-#                 answer, retrieved_docs, reasoning = handle_question(user_question, code_rag_chain, non_code_rag_chain, llm)
-#                 st.write(answer)
-#                 with st.expander("View Reasoning"):
-#                     st.write(reasoning)
-#                 if retrieved_docs:
-#                     with st.expander("Retrieved Documents"):
-#                         for doc in retrieved_docs:
-#                             st.write(f"**Document Source:** {doc.metadata.get('source', 'Unknown')}")
-#                             st.write(f"{doc.page_content[:500]}")
-        
-#         st.session_state.chat_history.append({"role": "assistant", "content": answer, "reasoning": reasoning})
+                except Exception as e:
+                    st.error(f"❌ Error processing question: {e}")
+                    logger.error(f"Question processing error: {e}")
