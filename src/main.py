@@ -1,14 +1,13 @@
 import sys
 from pathlib import Path
 
-import streamlit as st
-import torch
-
 # Add project root to path for utils import
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from langchain.vectorstores import FAISS
+import streamlit as st
+import torch
+from langchain_community.vectorstores import FAISS
 from sentence_transformers import SentenceTransformer
 
 from config.config import *
