@@ -4,6 +4,8 @@ A local-first RAG app for questioning a GitLab-derived corpus of Python files an
 
 The user-facing entrypoint is a Streamlit chat UI that returns answers, retrieved source snippets, reasoning, and evaluation feedback.
 
+The checked-in FAISS and docstore artifacts let you demo the app without rebuilding ingestion from scratch.
+
 <!-- README_SURFACE_START -->
 ```mermaid
 flowchart LR
@@ -22,6 +24,8 @@ flowchart LR
 ![Python](https://img.shields.io/badge/Python-RAG_Pipeline-3776AB?style=flat-square&logo=python&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-Assistant_UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white) ![Ollama](https://img.shields.io/badge/Ollama-Local_LLMs-111827?style=flat-square)
 
 ## Quickstart
+
+Verified path currently assumes Ollama installed and running plus a GPU-capable local environment. Windows `pip install -r requirements.txt` is not a verified default path.
 
 ```bash
 pip install -r requirements.txt
@@ -69,7 +73,7 @@ See [Setup and Run](#setup-and-run) for the full environment and verification pa
 2. Start Ollama, then run `python setup_models.py` to pull the Ollama models required by the current environment.
 3. If you are rebuilding the corpus, create/populate `data/aiap17-gitlab-data` first; `run_data_ingestion.py --test` uses a small 3-person/10-files-per-person sample, and the full run writes the root-level index/docstore artifacts.
 4. Launch the app with `streamlit run src/main.py`; it stops immediately if either FAISS index is missing.
-5. For a status check, the actual script in this repo is `system_status.py`, not `check.py`.
+5. Treat `system_status.py` as informational only; it is not a reliable proof that the full runtime path is operational.
 
 ## Core Workflows
 
