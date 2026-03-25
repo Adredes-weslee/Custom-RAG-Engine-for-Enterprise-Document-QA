@@ -4,6 +4,22 @@ A local-first RAG app for questioning a GitLab-derived corpus of Python files an
 
 The user-facing entrypoint is a Streamlit chat UI that returns answers, retrieved source snippets, reasoning, and evaluation feedback.
 
+<!-- README_SURFACE_START -->
+![Python](https://img.shields.io/badge/Python-RAG_Pipeline-3776AB?style=flat-square&logo=python&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-Assistant_UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white) ![Ollama](https://img.shields.io/badge/Ollama-Local_LLMs-111827?style=flat-square)
+
+[![Portfolio Article](https://img.shields.io/badge/Portfolio%20Article-102A43?style=flat-square)](https://adredes-weslee.github.io/ai/nlp/rag/2024/10/29/building-effective-rag-systems.html)
+## Quickstart
+
+```bash
+pip install -r requirements.txt
+python setup_models.py
+streamlit run src/main.py
+```
+
+See [Setup and Run](#setup-and-run) for the full environment and verification path.
+
+<!-- README_SURFACE_END -->
+
 ## Why This Repository Exists
 
 - Make private repo knowledge searchable without external API calls at question time; the app uses local Ollama models and local FAISS indexes.
