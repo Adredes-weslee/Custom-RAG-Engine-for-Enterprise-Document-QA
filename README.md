@@ -5,9 +5,22 @@ A local-first RAG app for questioning a GitLab-derived corpus of Python files an
 The user-facing entrypoint is a Streamlit chat UI that returns answers, retrieved source snippets, reasoning, and evaluation feedback.
 
 <!-- README_SURFACE_START -->
-![Python](https://img.shields.io/badge/Python-RAG_Pipeline-3776AB?style=flat-square&logo=python&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-Assistant_UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white) ![Ollama](https://img.shields.io/badge/Ollama-Local_LLMs-111827?style=flat-square)
+```mermaid
+flowchart LR
+    A["GitLab-derived corpus (.py + .ipynb)"] --> B["run_data_ingestion.py / data_ingestion.py<br/>extract -> enhance -> embed"]
+    B --> C["Repo-root artifacts<br/>faiss_code_index.bin<br/>faiss_non_code_index.bin<br/>code_docstore.json<br/>non_code_docstore.json"]
+    C --> D["src/main.py<br/>Streamlit runtime + SentenceTransformer + Ollama"]
+    D --> E{"question_handler.py<br/>Code or non-code?"}
+    E -->|Code| F["Code RAG chain"]
+    E -->|Non-code| G["Query enhancement + Non-code RAG chain"]
+    F --> H["Answer + sources + reasoning + evaluation"]
+    G --> H
+```
 
 [![Portfolio Article](https://img.shields.io/badge/Portfolio%20Article-102A43?style=flat-square)](https://adredes-weslee.github.io/ai/nlp/rag/2024/10/29/building-effective-rag-systems.html)
+
+![Python](https://img.shields.io/badge/Python-RAG_Pipeline-3776AB?style=flat-square&logo=python&logoColor=white) ![Streamlit](https://img.shields.io/badge/Streamlit-Assistant_UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white) ![Ollama](https://img.shields.io/badge/Ollama-Local_LLMs-111827?style=flat-square)
+
 ## Quickstart
 
 ```bash
