@@ -25,9 +25,18 @@ flowchart LR
 
 ## Quickstart
 
-Verified path currently assumes Ollama installed and running plus a GPU-capable local environment. Windows `pip install -r requirements.txt` is not a verified default path.
+Verified path currently assumes Ollama installed and running plus a GPU-capable local environment. Windows `pip install -r requirements.txt` is not the preferred default path.
 
 ```bash
+# Verified conda / GPU path
+conda env create -f deployment/environment.yaml
+conda activate rag-enterprise
+python setup_models.py
+streamlit run src/main.py
+```
+
+```bash
+# Best-effort pip path (not the preferred Windows full-stack route)
 pip install -r requirements.txt
 python setup_models.py
 streamlit run src/main.py
@@ -69,11 +78,12 @@ See [Setup and Run](#setup-and-run) for the full environment and verification pa
 
 ## Setup and Run
 
-1. Install dependencies from `requirements.txt` or use `deployment/environment.yaml` for the conda/GPU path; the pip file is GPU-oriented, not CPU-only.
+1. Prefer `deployment/environment.yaml` for the verified conda/GPU path; `requirements.txt` is still GPU-oriented and is better treated as a best-effort install path rather than the default Windows local route.
 2. Start Ollama, then run `python setup_models.py` to pull the Ollama models required by the current environment.
-3. If you are rebuilding the corpus, create/populate `data/aiap17-gitlab-data` first; `run_data_ingestion.py --test` uses a small 3-person/10-files-per-person sample, and the full run writes the root-level index/docstore artifacts.
-4. Launch the app with `streamlit run src/main.py`; it stops immediately if either FAISS index is missing.
-5. Treat `system_status.py` as informational only; it is not a reliable proof that the full runtime path is operational.
+3. The checked-in runtime expects four repo-root artifacts to exist before launch: `faiss_code_index.bin`, `faiss_non_code_index.bin`, `code_docstore.json`, and `non_code_docstore.json`. The app also downloads `all-MiniLM-L6-v2` on first run if it is not already cached locally, so the first startup may need network access.
+4. If you are rebuilding the corpus, create/populate `data/aiap17-gitlab-data` first; `run_data_ingestion.py --test` uses a small 3-person/10-files-per-person sample, and the full run writes the root-level index/docstore artifacts.
+5. Launch the app with `streamlit run src/main.py` after the artifacts above are present.
+6. Treat `system_status.py` as informational only; it is not a reliable proof that the full runtime path is operational.
 
 ## Core Workflows
 

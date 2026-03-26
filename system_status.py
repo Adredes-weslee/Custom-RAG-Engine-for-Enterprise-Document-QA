@@ -56,15 +56,14 @@ def show_deployment_readiness():
     print("\n🚀 DEPLOYMENT READINESS")
     print("-" * 30)
     print("✅ GPU-first local development environment ready")
-    print("✅ CPU-only Streamlit deployment files ready")
+    print("✅ Streamlit runtime files present")
     print("✅ Environment files configured:")
     print("   📁 deployment/environment.yaml (GPU development)")
-    print("   📁 deployment/requirements-local.txt (GPU packages)")
-    print("   📁 requirements.txt (CPU-only for Streamlit)")
+    print("   📁 requirements.txt (best-effort pip install path)")
 
     print("\n📋 READY FOR:")
     print("   🔬 Local GPU-accelerated development")
-    print("   ☁️  CPU-only cloud deployment (Streamlit)")
+    print("   ☁️  Streamlit runtime checks")
     print("   🧪 All testing scenarios")
     print("   🎯 Production RAG operations")
 
